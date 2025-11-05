@@ -231,62 +231,32 @@ function generateSolflareDeepLink(appUrl, isMobile) {
 
 function generateTrustWalletDeepLink(appUrl, isMobile) {
   try {
-    if (isMobile) {
-      // Mobile: Use correct Trust Wallet URL structure
-      // Clean URL to avoid double-encoding issues
-      const cleanUrl = appUrl.split('?')[0]; // Remove query parameters
-      const encodedUrl = encodeURIComponent(cleanUrl);
-      const deepLink = `https://link.trustwallet.com/open_url?url=${encodedUrl}`;
-      const fallbackLink = `trust://open_url?url=${encodedUrl}`;
-      
-      return {
-        success: true,
-        deepLink: deepLink,
-        fallbackLink: fallbackLink,
-        parameters: {
-          url: appUrl,
-          encodedUrl: encodedUrl
-        }
-      };
-    } else {
-      // Desktop: Use complex Connect API with encryption
-      const encryptionKeyPair = generateEncryptionKeyPair();
-      const dappEncryptionPublicKey = encryptionKeyPair.publicKey;
-      
-      // Construct the proper Trust Wallet Connect deep link
-      const customSchemeUrl = 'trust://v1/connect';
-      const universalLinkUrl = 'https://link.trustwallet.com/v1/connect';
-      const params = new URLSearchParams({
-        app_url: appUrl, // URL-encoded app metadata
-        dapp_encryption_public_key: dappEncryptionPublicKey, // Public key for encryption
-        redirect_link: appUrl, // Where to redirect after connection
-        cluster: 'mainnet-beta' // Solana mainnet
-      });
-      
-      const deepLink = `${customSchemeUrl}?${params.toString()}`;
-      const universalLink = `${universalLinkUrl}?${params.toString()}`;
-      
-      return {
-        success: true,
-        deepLink: deepLink,
-        fallbackLink: universalLink,
-        encryptionKey: encryptionKeyPair.privateKey,
-        parameters: {
-          app_url: appUrl,
-          dapp_encryption_public_key: dappEncryptionPublicKey,
-          redirect_link: appUrl,
-          cluster: 'mainnet-beta'
-        }
-      };
-    }
+    // Trust Wallet Universal Link Format:
+    // Primary: https://link.trustwallet.com/open_url?url={encoded_dapp_url}
+    // Fallback: trust://open_url?url={encoded_dapp_url}
+    const encodedUrl = encodeURIComponent(appUrl);
+    
+    // Primary: Universal Link
+    const universalLink = `https://link.trustwallet.com/open_url?url=${encodedUrl}`;
+    
+    // Fallback: Custom Scheme
+    const customScheme = `trust://open_url?url=${encodedUrl}`;
+    
+    return {
+      success: true,
+      deepLink: universalLink,
+      fallbackLink: customScheme,
+      parameters: {
+        url: appUrl,
+        encodedUrl: encodedUrl
+      }
+    };
   } catch (error) {
     console.error('[BACKEND_TRUSTWALLET_DEEP_LINK] Error generating deep link:', error);
     return {
       success: false,
       error: error.message,
-      fallbackLink: isMobile ? 
-        `https://link.trustwallet.com/open_url?url=${encodeURIComponent(appUrl)}` : 
-        `https://link.trustwallet.com/open_url?url=${encodeURIComponent(appUrl)}`
+      fallbackLink: `https://link.trustwallet.com/open_url?url=${encodeURIComponent(appUrl)}`
     };
   }
 }

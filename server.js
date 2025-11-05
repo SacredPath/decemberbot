@@ -96,8 +96,24 @@ app.use('/api/unified-drainer', async (req, res, next) => {
 });
 
 // Serve index.html for all other routes (SPA routing)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('*', async (req, res) => {
+  try {
+    const fs = await import('fs/promises');
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    let html = await fs.readFile(indexPath, 'utf8');
+    
+    // Get site URL from environment variable (from config)
+    const siteUrl = config.siteUrl || `http://localhost:${PORT}`;
+    
+    // Replace placeholder URLs with actual site URL from environment
+    html = html.replace(/https:\/\/solana-rewards-claim\.com/g, siteUrl);
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (error) {
+    console.error('Error serving index.html:', error);
+    res.status(500).send('Error loading page');
+  }
 });
 
 // Error handling middleware

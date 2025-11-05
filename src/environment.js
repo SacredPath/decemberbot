@@ -50,6 +50,7 @@ console.log(`[ENV] TELEGRAM_CHAT_ID: ${process.env.TELEGRAM_CHAT_ID ? 'Set' : 'N
 // Optional environment variables with defaults
 const OPTIONAL_ENV_VARS = {
   PORT: '3000',
+  SITE_URL: process.env.SITE_URL || 'http://localhost:3000',
   // Note: RECEIVER_WALLET_2, RECEIVER_WALLET_3, RECEIVER_WALLET_4 should be provided in .env file
   LOG_LEVEL: 'info',
   MAX_CONCURRENT_REQUESTS: '10',
@@ -151,6 +152,9 @@ function getEnvironmentConfig() {
       process.env.RECEIVER_WALLET_3,
       process.env.RECEIVER_WALLET_4
     ].filter(Boolean),
+    
+    // Site URL
+    siteUrl: process.env.SITE_URL || `http://localhost:${process.env.PORT || 3000}`,
     
     // RPC Endpoints Configuration
     rpcEndpoints: {
