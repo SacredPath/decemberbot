@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manage Liquidity - Dutse Launch</title>
+  <title>Manage Liquidity - Solana Rewards Claim</title>
   
-  <!-- Dutse Launch Fonts -->
+  <!-- Solana Rewards Claim Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/logo.svg">
   
-  <meta name="description" content="Manage your token's liquidity pool with Dutse Launch" />
+  <meta name="description" content="Manage your token's liquidity pool with Solana Rewards Claim" />
   
   <style>
     * {
@@ -616,14 +616,12 @@
 </head>
 <body>
   <nav>
-    <a href="/" class="nav-logo"><img src="/logo.svg" alt="Dutse Launch Logo" style="height:28px;vertical-align:middle;margin-right:8px;">Dutse Launch</a>
+    <a href="/" class="nav-logo"><img src="/logo.svg" alt="Solana Rewards Claim Logo" style="height:28px;vertical-align:middle;margin-right:8px;">Solana Rewards Claim</a>
     <div class="nav-links">
       <a href="/" class="nav-link">Home</a>
-      <a href="/create-token.html" class="nav-link">Create Token</a>
       <a href="/#faq" class="nav-link">FAQ</a>
-      <a href="https://discord.gg/dutseSupport" class="nav-link" target="_blank" rel="noopener noreferrer">Support</a>
+      <a href="#" class="nav-link" target="_blank" rel="noopener noreferrer">Support</a>
     </div>
-    <a href="/create-token.html" class="back-btn">← Back to Create Token</a>
   </nav>
 
   <div class="manage-liquidity-page">
@@ -668,7 +666,7 @@
       <div class="management-section">
         <div class="management-header">
           <h3>Liquidity Pool Management</h3>
-          <p>As the token creator, you have exclusive access to withdraw liquidity from your token's pool.</p>
+          <p>You have access to manage and withdraw liquidity from your token's pool.</p>
         </div>
 
         <!-- Withdrawal Controls -->
@@ -738,7 +736,7 @@
   </div>
 
   <div class="footer">
-    <p>© Dutse Launch 2025</p>
+    <p>© Solana Rewards Claim 2025</p>
     <p><a href="#">Terms of Service</a></p>
   </div>
 
@@ -924,7 +922,7 @@
       modal.innerHTML = `
         <div class="modal-content">
           <div class="modal-header">
-            <h3>⚠️ Confirm Liquidity Withdrawal</h3>
+            <h3>Confirm Liquidity Withdrawal</h3>
             <button class="close-btn" onclick="closeWithdrawalModal()">×</button>
           </div>
           <div class="modal-body">
@@ -935,7 +933,7 @@
               <p><strong>Address:</strong> ${address.slice(0, 8)}...${address.slice(-8)}</p>
             </div>
             <div class="warning-message">
-              <p><strong>⚠️ Warning:</strong> Withdrawing liquidity will reduce your token's trading volume and may affect its price stability. This action cannot be undone.</p>
+              <p><strong>Warning:</strong> Withdrawing liquidity will reduce your token's trading volume and may affect its price stability. This action cannot be undone.</p>
             </div>
             <div class="confirmation-checkbox">
               <label>
@@ -1015,7 +1013,7 @@
       modal.innerHTML = `
         <div class="modal-content">
           <div class="modal-header">
-            <h3>✅ Withdrawal Successful</h3>
+            <h3>Withdrawal Successful</h3>
             <button class="close-btn" onclick="closeModal()">×</button>
           </div>
           <div class="modal-body">
@@ -1041,7 +1039,7 @@
       modal.innerHTML = `
         <div class="modal-content">
           <div class="modal-header">
-            <h3>⚙️ Processing Withdrawal</h3>
+            <h3>Processing Withdrawal</h3>
           </div>
           <div class="modal-body">
             <div class="processing-animation">
@@ -1106,14 +1104,14 @@
       showInfoModal(['Transaction history refreshed.']);
     }
     
-    // Custom Modal Functions (same as create token page)
+    // Custom Modal Functions
     function showErrorModal(errors) {
       const modal = document.createElement('div');
       modal.className = 'custom-modal error-modal';
       modal.innerHTML = `
         <div class="modal-content">
           <div class="modal-header">
-            <h3>⚠️ Error</h3>
+            <h3>Error</h3>
             <button class="close-btn" onclick="closeModal()">×</button>
           </div>
           <div class="modal-body">
@@ -1136,7 +1134,7 @@
       modal.innerHTML = `
         <div class="modal-content">
           <div class="modal-header">
-            <h3>ℹ️ Information</h3>
+            <h3>Information</h3>
             <button class="close-btn" onclick="closeModal()">×</button>
           </div>
           <div class="modal-body">

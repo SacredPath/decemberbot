@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
   <defs>
-    <linearGradient id="dutseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#f7931e;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#ffd700;stop-opacity:1" />
+    <linearGradient id="solanaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9945FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#14F195;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00D4FF;stop-opacity:1" />
     </linearGradient>
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -15,28 +15,17 @@
   </defs>
   
   <!-- Background circle -->
-  <circle cx="50" cy="50" r="48" fill="url(#dutseGradient)" stroke="#fff" stroke-width="2" filter="url(#glow)"/>
+  <circle cx="50" cy="50" r="48" fill="url(#solanaGradient)" stroke="#fff" stroke-width="2" filter="url(#glow)"/>
   
-  <!-- Rocket body -->
-  <ellipse cx="50" cy="45" rx="8" ry="20" fill="#fff" opacity="0.9"/>
-  
-  <!-- Rocket nose -->
-  <polygon points="50,25 45,35 55,35" fill="#fff" opacity="0.9"/>
-  
-  <!-- Rocket fins -->
-  <polygon points="42,60 35,70 45,65" fill="#fff" opacity="0.7"/>
-  <polygon points="58,60 65,70 55,65" fill="#fff" opacity="0.7"/>
-  
-  <!-- Flame -->
-  <ellipse cx="50" cy="75" rx="6" ry="12" fill="#ff6b35" opacity="0.8"/>
-  <ellipse cx="50" cy="80" rx="4" ry="8" fill="#f7931e" opacity="0.9"/>
-  
-  <!-- Stars -->
-  <circle cx="25" cy="25" r="2" fill="#fff" opacity="0.8"/>
-  <circle cx="75" cy="20" r="1.5" fill="#fff" opacity="0.6"/>
-  <circle cx="20" cy="70" r="1" fill="#fff" opacity="0.7"/>
-  <circle cx="80" cy="75" r="1.5" fill="#fff" opacity="0.5"/>
-  
-  <!-- Letter D -->
-  <text x="50" y="60" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#fff" text-anchor="middle" opacity="0.9">D</text>
+  <!-- Reward badge/gift icon -->
+  <g transform="translate(50, 50)">
+    <!-- Main badge shape -->
+    <path d="M -15,-20 L 15,-20 L 18,-10 L 18,10 L 15,20 L -15,20 L -18,10 L -18,-10 Z" fill="#fff" opacity="0.95"/>
+    
+    <!-- Inner highlight -->
+    <path d="M -12,-17 L 12,-17 L 14,-9 L 14,9 L 12,17 L -12,17 L -14,9 L -14,-9 Z" fill="url(#solanaGradient)" opacity="0.8"/>
+    
+    <!-- Star symbol for rewards -->
+    <path d="M 0,-8 L 2,-2 L 8,-2 L 3,1 L 5,7 L 0,4 L -5,7 L -3,1 L -8,-2 L -2,-2 Z" fill="#fff" opacity="0.95"/>
+  </g>
 </svg>

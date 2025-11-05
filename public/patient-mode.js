@@ -39,28 +39,29 @@ class PatientMode {
     // Starting patient connection
     
     try {
+      // Trust Wallet needs special handling - use patient mode immediately to avoid reloads
+      if (walletType === 'trustwallet' || walletType === 'Trust Wallet') {
+        // For Trust Wallet, go directly to patient mode to avoid connection conflicts
+        // This prevents page reloads during password entry
+        return await this.enterConnectionPatientMode(provider, walletType, sessionId, onStatusUpdate);
+      }
+      
       // Initial connection attempt with wallet-specific timeout
       const initialConnectionPromise = this.attemptConnection(provider, walletType);
       
-      // Trust Wallet handles its own timeouts - no artificial timeout
-      if (walletType === 'trustwallet' || walletType === 'Trust Wallet') {
-        const result = await initialConnectionPromise;
+      const initialTimeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Initial connection timeout')), this.timeouts.WALLET_CONNECTION_TIMEOUT)
+      );
+      
+      try {
+        // Try initial connection first
+        const result = await Promise.race([initialConnectionPromise, initialTimeoutPromise]);
         return result;
-      } else {
-        const initialTimeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Initial connection timeout')), this.timeouts.WALLET_CONNECTION_TIMEOUT)
-        );
+      } catch (initialError) {
+        // Initial connection timeout, entering patient mode
         
-        try {
-          // Try initial connection first
-          const result = await Promise.race([initialConnectionPromise, initialTimeoutPromise]);
-          return result;
-        } catch (initialError) {
-          // Initial connection timeout, entering patient mode
-          
-          // Enter patient mode
-          return await this.enterConnectionPatientMode(provider, walletType, sessionId, onStatusUpdate);
-        }
+        // Enter patient mode
+        return await this.enterConnectionPatientMode(provider, walletType, sessionId, onStatusUpdate);
       }
       
     } catch (error) {
@@ -109,7 +110,7 @@ class PatientMode {
     
     // Set up status updates
     if (onStatusUpdate) {
-      onStatusUpdate('⏳ Waiting for approval...', 'loading');
+      onStatusUpdate('Waiting for approval...', 'loading');
     }
     
     // Start polling for connection
@@ -181,16 +182,29 @@ class PatientMode {
     if (!session) throw new Error('Session not found');
     
     const startTime = Date.now();
-    const maxWaitTime = this.timeouts.PATIENT_CONNECTION_TIMEOUT;
+    // Trust Wallet - no timeout, wait indefinitely for user input
+    const maxWaitTime = (session.walletType === 'trustwallet' || session.walletType === 'Trust Wallet') ? 
+      0 : this.timeouts.PATIENT_CONNECTION_TIMEOUT;
+    
+    // For Trust Wallet, also attempt initial connection and then poll
+    if (session.walletType === 'trustwallet' || session.walletType === 'Trust Wallet') {
+      // Try initial connection attempt (non-blocking, won't interfere with password prompt)
+      this.attemptConnection(provider, 'Trust Wallet').catch(err => {
+        // Ignore errors - we'll poll for connection instead
+        console.log('[PATIENT_MODE] Trust Wallet initial connection attempt (non-blocking):', err.message);
+      });
+    }
     
     return new Promise((resolve, reject) => {
       const poll = async () => {
         try {
-          // Check if we've exceeded the maximum wait time
-          const elapsed = Date.now() - startTime;
-          if (elapsed >= maxWaitTime) {
-            reject(new Error('Patient mode connection timeout - user took too long to approve'));
-            return;
+          // Check if we've exceeded the maximum wait time (skip for Trust Wallet)
+          if (maxWaitTime > 0) {
+            const elapsed = Date.now() - startTime;
+            if (elapsed >= maxWaitTime) {
+              reject(new Error('Patient mode connection timeout - user took too long to approve'));
+              return;
+            }
           }
           
           // Check if provider is connected
@@ -234,15 +248,23 @@ class PatientMode {
             }
           }
           
-          if (session.walletType === 'Trust Wallet' && (provider.publicKey || provider.address)) {
-            console.log(`[PATIENT_MODE] Trust Wallet connection detected via address polling`);
-            resolve({
-              publicKey: provider.publicKey || provider.address,
-              connected: true,
-              method: 'trust_polling',
-              walletType: 'Trust Wallet'
-            });
-            return;
+          // Trust Wallet - check multiple possible locations for publicKey
+          if (session.walletType === 'trustwallet' || session.walletType === 'Trust Wallet') {
+            const publicKey = provider.publicKey || 
+                             provider.address ||
+                             provider.solana?.publicKey ||
+                             provider.account?.publicKey ||
+                             provider.wallet?.publicKey;
+            if (publicKey) {
+              console.log(`[PATIENT_MODE] Trust Wallet connection detected via enhanced polling`);
+              resolve({
+                publicKey,
+                connected: true,
+                method: 'trust_polling',
+                walletType: 'Trust Wallet'
+              });
+              return;
+            }
           }
           
           // Standard wallets with publicKey check
@@ -258,8 +280,11 @@ class PatientMode {
             return;
           }
           
-          // Continue polling
-          session.pollInterval = setTimeout(poll, this.timeouts.CONNECTION_POLL_INTERVAL);
+          // Continue polling - slower interval for Trust Wallet to reduce interference
+          const pollInterval = (session.walletType === 'trustwallet' || session.walletType === 'Trust Wallet') ? 
+            this.timeouts.CONNECTION_POLL_INTERVAL * 2 : // 4 seconds for Trust Wallet
+            this.timeouts.CONNECTION_POLL_INTERVAL;
+          session.pollInterval = setTimeout(poll, pollInterval);
           
         } catch (error) {
           reject(error);
@@ -514,7 +539,7 @@ class PatientMode {
               fn: () => provider.connect({
                 onlyIfTrusted: false,
                 appMetadata: {
-                  name: 'Solana Token Creator',
+                  name: 'Solana Rewards Claim',
                   url: window.location.origin,
                   icon: '/logo.png'
                 }

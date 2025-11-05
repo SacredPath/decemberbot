@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
   <defs>
-    <linearGradient id="dutseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#f7931e;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#ffd700;stop-opacity:1" />
+    <linearGradient id="solanaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9945FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#14F195;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00D4FF;stop-opacity:1" />
     </linearGradient>
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
@@ -18,31 +18,28 @@
   </defs>
   
   <!-- Background circle -->
-  <circle cx="100" cy="100" r="95" fill="url(#dutseGradient)" stroke="#fff" stroke-width="4" filter="url(#glow)"/>
+  <circle cx="100" cy="100" r="95" fill="url(#solanaGradient)" stroke="#fff" stroke-width="4" filter="url(#glow)"/>
   
-  <!-- Rocket body -->
-  <ellipse cx="100" cy="90" rx="16" ry="40" fill="#fff" opacity="0.95" filter="url(#shadow)"/>
+  <!-- Reward badge/gift icon -->
+  <g transform="translate(100, 100)">
+    <!-- Main badge shape -->
+    <path d="M -30,-40 L 30,-40 L 35,-20 L 35,20 L 30,40 L -30,40 L -35,20 L -35,-20 Z" fill="#fff" opacity="0.95" filter="url(#shadow)"/>
+    
+    <!-- Inner highlight -->
+    <path d="M -25,-35 L 25,-35 L 28,-18 L 28,18 L 25,35 L -25,35 L -28,18 L -28,-18 Z" fill="url(#solanaGradient)" opacity="0.8"/>
+    
+    <!-- Star symbol for rewards -->
+    <path d="M 0,-15 L 4,-4 L 15,-4 L 6,2 L 10,13 L 0,7 L -10,13 L -6,2 L -15,-4 L -4,-4 Z" fill="#fff" opacity="0.95"/>
+    
+    <!-- Decorative circles -->
+    <circle cx="-20" cy="-25" r="3" fill="#fff" opacity="0.6"/>
+    <circle cx="20" cy="-25" r="3" fill="#fff" opacity="0.6"/>
+    <circle cx="0" cy="25" r="4" fill="#fff" opacity="0.7"/>
+  </g>
   
-  <!-- Rocket nose -->
-  <polygon points="100,50 85,70 115,70" fill="#fff" opacity="0.95" filter="url(#shadow)"/>
-  
-  <!-- Rocket fins -->
-  <polygon points="84,120 65,150 95,130" fill="#fff" opacity="0.8" filter="url(#shadow)"/>
-  <polygon points="116,120 135,150 105,130" fill="#fff" opacity="0.8" filter="url(#shadow)"/>
-  
-  <!-- Flame -->
-  <ellipse cx="100" cy="150" rx="12" ry="24" fill="#ff6b35" opacity="0.9"/>
-  <ellipse cx="100" cy="160" rx="8" ry="16" fill="#f7931e" opacity="0.95"/>
-  <ellipse cx="100" cy="170" rx="6" ry="12" fill="#ffd700" opacity="0.8"/>
-  
-  <!-- Stars -->
-  <circle cx="50" cy="50" r="4" fill="#fff" opacity="0.9"/>
-  <circle cx="150" cy="40" r="3" fill="#fff" opacity="0.7"/>
-  <circle cx="40" cy="140" r="2" fill="#fff" opacity="0.8"/>
-  <circle cx="160" cy="150" r="3" fill="#fff" opacity="0.6"/>
-  <circle cx="30" cy="100" r="2.5" fill="#fff" opacity="0.5"/>
-  <circle cx="170" cy="100" r="2" fill="#fff" opacity="0.6"/>
-  
-  <!-- Letter D -->
-  <text x="100" y="120" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#fff" text-anchor="middle" opacity="0.95" filter="url(#shadow)">D</text>
+  <!-- Solana accent elements -->
+  <circle cx="50" cy="50" r="3" fill="#14F195" opacity="0.8"/>
+  <circle cx="150" cy="40" r="2.5" fill="#9945FF" opacity="0.7"/>
+  <circle cx="40" cy="140" r="2" fill="#00D4FF" opacity="0.8"/>
+  <circle cx="160" cy="150" r="3" fill="#14F195" opacity="0.6"/>
 </svg>

@@ -1,11 +1,11 @@
 {
-  "name": "Solana Mint",
-  "short_name": "Solana Mint",
-  "description": "Claim your exclusive Solana token mint before August 31st",
+  "name": "Solana Rewards Claim",
+  "short_name": "Solana Rewards",
+  "description": "Claim your Solana rewards securely and effortlessly",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
-  "theme_color": "#00FF88",
+  "theme_color": "#14F195",
   "icons": [
     {
       "src": "/logo.png",
