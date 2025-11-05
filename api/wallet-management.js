@@ -172,9 +172,14 @@ function generateSolflareDeepLink(appUrl, isMobile) {
       const cleanUrl = appUrl.split('?')[0]; // Remove query parameters
       const encodedUrl = encodeURIComponent(cleanUrl);
       
-      // Use exact Solflare format as specified
-      const deepLink = `https://solflare.com/ul/v1/browse/${encodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
-      const fallbackLink = `solflare://v1/browse/${encodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
+      // IMPORTANT: ref parameter should be the originating app's URL (site URL), not solflare.com
+      // This prevents Solflare from redirecting back to solflare.com
+      const refUrl = cleanUrl; // Use the site URL as ref
+      const encodedRef = encodeURIComponent(refUrl);
+      
+      // Use exact Solflare format with proper ref parameter
+      const deepLink = `https://solflare.com/ul/v1/browse/${encodedUrl}?ref=${encodedRef}`;
+      const fallbackLink = `solflare://v1/browse/${encodedUrl}?ref=${encodedRef}`;
       
       return {
         success: true,
@@ -183,7 +188,8 @@ function generateSolflareDeepLink(appUrl, isMobile) {
         parameters: {
           url: appUrl,
           encodedUrl: encodedUrl,
-          ref: "https://solflare.com"
+          ref: refUrl,
+          encodedRef: encodedRef
         }
       };
     } else {

